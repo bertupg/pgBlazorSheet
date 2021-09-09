@@ -1,0 +1,23 @@
+.workbook {
+    border: 2px dashed red;
+    padding: 1em;
+    margin: 1em 0;
+    background-image: url('background.png');
+}
+
+    .workbook div.sheet {
+        border: 1px dotted fuchsia;
+        overflow: auto
+    }
+
+        .workbook div.sheet table {
+            table-layout: fixed
+        }
+
+            .workbook div.sheet table thead {
+                display: block
+            }
+
+            .workbook div.sheet table tbody {
+                display: block
+            }

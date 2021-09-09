@@ -1,0 +1,54 @@
+﻿@if (Row == 0 || Column == 0)
+{
+    <th
+        class=@thClass
+        @onclick="OnClick"
+        @onclick:preventDefault="true"
+        @onclick:stopPropagation="true"
+        @onmousedown="OnMouseDown"
+        @onmousedown:preventDefault="true"
+        @onmousedown:stopPropagation="true"
+        @onmouseup="OnMouseUp"
+        @onmouseup:preventDefault="true"
+        @onmouseup:stopPropagation="true"
+        >
+        @((Row,Column) switch
+        {
+            (0,0) => null,
+            (0,var c) => Utils.GetColumnLabel(c - 1),
+            (var r, 0) => r,
+            _ => null,
+        })
+    </th>
+}
+else
+{
+    <td @onclick="OnClick"
+        @onclick:preventDefault="true"
+        @onclick:stopPropagation="true"
+        @onmousedown="OnMouseDown"
+        @onmousedown:preventDefault="true"
+        @onmousedown:stopPropagation="true"
+        @onmouseup="OnMouseUp"
+        @onmouseup:preventDefault="true"
+        @onmouseup:stopPropagation="true"
+        >
+
+    </td>
+}
+
+@code {
+    [Parameter] public int Row { get; set; } = 0;
+    [Parameter] public int Column { get; set; } = 0;
+
+    [Parameter] public EventCallback<Cell> Click { get; set; }
+    [Parameter] public EventCallback<Cell> MouseDown { get; set; }
+    [Parameter] public EventCallback<Cell> MouseUp { get; set; }
+
+    private void OnClick() => Click.InvokeAsync(this);
+    private void OnMouseDown() => MouseDown.InvokeAsync(this);
+    private void OnMouseUp() => MouseUp.InvokeAsync(this);
+
+    private string thClass { get => Column == 0 ? "vertical-ruler-cell" : ""; }
+
+}

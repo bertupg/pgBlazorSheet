@@ -1,0 +1,45 @@
+﻿<div class="workbook">
+    Row: @(CurrentRow>0?CurrentRow:null) Col: @(CurrentCol > 0?Utils.GetColumnLabel(CurrentCol-1):null) Mouse Down = @(MouseDown?"SI":"NO")
+    <div class="sheet">
+        <table>
+            <thead>
+                <tr>
+                    <Cell Click=CellClick MouseDown=CellMouseDown MouseUp=CellMouseUp />
+                    @for (int c = 1; c <= Columns; c++)
+                    {
+                        var col = c; // copio il valore da passare nelle lambda
+                        <Cell Column=col Click=CellClick MouseDown=CellMouseDown MouseUp=CellMouseUp />
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for (int r = 1; r <= Rows; r++)
+                {
+                    var row = r; // copio il valore da passare nelle lambda
+                    <tr>
+                        <Cell Row=row Click=CellClick MouseDown=CellMouseDown MouseUp=CellMouseUp />
+                        @for (int c = 1; c <= Columns; c++)
+                        {
+                            var col = c; // copio il valore da passare nelle lambda
+                            <Cell Row=row Column=col Click=CellClick MouseDown=CellMouseDown MouseUp=CellMouseUp />
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code
+{
+    [Parameter] public int Rows { get; set; } = 20;
+    [Parameter] public int Columns { get; set; } = 10;
+
+    private bool MouseDown;
+    private int CurrentRow;
+    private int CurrentCol;
+
+    private void CellClick(Cell c) { CurrentRow = c.Row; CurrentCol = c.Column; }
+    private void CellMouseDown(Cell c) { MouseDown = true; CellClick(c); }
+    private void CellMouseUp(Cell c) { MouseDown = false; CellClick(c); }
+}

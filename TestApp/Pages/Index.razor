@@ -1,0 +1,11 @@
+﻿@page "/"
+@using SheetComponent
+
+<button @onclick="() => rows++">Add Row</button>
+<button @onclick="() => cols++">Add Column</button>
+<Sheet Rows=rows Columns=cols />
+
+@code{
+    int rows = 10;
+    int cols = 10;
+}
