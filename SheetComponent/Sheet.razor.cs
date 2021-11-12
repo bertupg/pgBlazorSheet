@@ -19,7 +19,6 @@ namespace SheetComponent
         private ElementReference StatusBar { get; set; }
 
         public Range Selection { get; private set; }
-        //public bool InEdit { get; private set; }
 
         private bool MouseDown;
         private Position CurrentPosition;
@@ -37,18 +36,7 @@ namespace SheetComponent
             }
             if (end != null) EndPosition = end.Value;
             Selection = new Range() { Start = StartPosition, End = EndPosition };
-            //StateHasChanged();
             if (CellInput.Context != null) await CellInput.FocusAsync();
-        }
-
-        private void TableBodyKeyPress(KeyboardEventArgs args)
-        {
-            Console.WriteLine(nameof(TableBodyKeyPress) + ":" + args.Code);
-            //if (!InEdit)
-            //{
-            //    InEdit = true;
-            //    StateHasChanged();
-            //}
         }
 
         private void CellClick(Position pos, MouseEventArgs args)
@@ -96,23 +84,6 @@ namespace SheetComponent
                     CurrentPosition = StartPosition; // mouse up e mouse move in celle diverse => l'evento click non viene sollevato e devo sopperire
                 }
             }
-        }
-
-        private async void CellInputKeyPress(KeyboardEventArgs args)
-        {
-            //await StatusBar.FocusAsync();
-        }
-
-        private async void CellInputKeyDown(KeyboardEventArgs args)
-        {
-        }
-
-        private void UpdateCellValue(Position pos, string newValue)
-        {
-            var cell = SheetData.Find(x => x.Position == CurrentPosition);
-            if (cell is null) SheetData.Add(cell = new() { Position = CurrentPosition });
-            cell.Value = newValue;
-            Console.WriteLine($"Changed {CurrentPosition} to {cell.Value}");
         }
 
         private Cell GetCell(Position pos, bool createNew = false)

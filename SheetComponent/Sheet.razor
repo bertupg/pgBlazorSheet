@@ -32,7 +32,7 @@
                     }
                 </tr>
             </thead>
-            <tbody> @*@onkeypress="TableBodyKeyPress" @onkeypress:stopPropagation*@
+            <tbody>
                 @for (int row = 1; row <= Rows; row++)
                 {
                     Position pos0 = (row, 0);
@@ -60,7 +60,6 @@
                                     {
                                         var cell = GetCell(pos, true);
                                         <input @key=pos @ref="CellInput"
-                                               @onkeypress="CellInputKeyPress"
                                                @bind="cell.Value" @bind:event="oninput"
                                                style="width:76px"
                                                />
@@ -78,6 +77,5 @@
         </table>
     </div>
 
-    @*<ol>@foreach (Cell c in SheetData) { <li>@c.Position: @c.Value</li> }</ol>*@
 </div>
 
