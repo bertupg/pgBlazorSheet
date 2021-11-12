@@ -8,6 +8,10 @@ namespace SheetComponent
 {
     public static class Utils
     {
-        public static string GetColumnLabel(int id, string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ") => (id > letters.Length ? GetColumnLabel(id / letters.Length) : "") + letters[id % letters.Length];
+        private static string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        public static string GetColumnLabel(int col) => col > 0 ? InternalGetLabel(col - 1) : "";
+        private static string InternalGetLabel(int id) => (id > letters.Length ? GetColumnLabel(id / letters.Length) : "") + letters[id % letters.Length];
+
+        public static string JoinStrings(this IEnumerable<string> list, string separatore = " ") => string.Join(separatore, list);
     }
 }

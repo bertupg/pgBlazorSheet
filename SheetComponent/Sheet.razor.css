@@ -21,3 +21,57 @@
             .workbook div.sheet table tbody {
                 display: block
             }
+
+
+            .workbook div.sheet table th {
+                background: lightgray;
+                border: 1px darkgray;
+                min-width: 80px;
+                max-width: 80px;
+            }
+
+            .workbook div.sheet table td {
+                background: white;
+                border: 1px solid lightgray;
+                min-width: 80px;
+                max-width: 80px;
+                height: 30px;
+            }
+
+            .workbook div.sheet table thead th {
+                position: sticky;
+                top: 0;
+                z-index: 1;
+                text-align: center;
+            }
+
+            .workbook div.sheet table tbody th {
+                position: sticky;
+                left: 0;
+                text-align: end
+            }
+
+            .workbook div.sheet table th.vertical-ruler-cell {
+                min-width: 30px;
+                max-width: 30px;
+            }
+
+            .workbook div.sheet table td.selected {
+                background-color: lightblue
+            }
+
+            .workbook div.sheet table td.selection-top {
+                border-top: 2px solid blue
+            }
+
+            .workbook div.sheet table td.selection-bottom {
+                border-bottom: 2px solid blue
+            }
+
+            .workbook div.sheet table td.selection-left {
+                border-left: 2px solid blue
+            }
+
+            .workbook div.sheet table td.selection-right {
+                border-right: 2px solid blue
+            }

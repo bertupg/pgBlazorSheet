@@ -1,45 +1,83 @@
 ﻿<div class="workbook">
-    Row: @(CurrentRow>0?CurrentRow:null) Col: @(CurrentCol > 0?Utils.GetColumnLabel(CurrentCol-1):null) Mouse Down = @(MouseDown?"SI":"NO")
+    <input @ref="StatusBar" readonly style="width:100%" value="
+    Position: @CurrentPosition
+    Selection: @($"{Selection.Height}x{Selection.Width} from {Selection.Start} to {Selection.End}")
+    Mouse Down: @(MouseDown ? "SI" : "NO")
+    Data Size: @SheetData.Count
+    " />
+
     <div class="sheet">
         <table>
             <thead>
                 <tr>
-                    <Cell Click=CellClick MouseDown=CellMouseDown MouseUp=CellMouseUp />
+                    @*Cella (0,0) - Incrocio delle intestazioni *@
+                    <th class=@getThClasses((0,0)).JoinStrings()
+                        @onclick="e => CellClick((0,0), e)" @onclick:preventDefault="true" @onclick:stopPropagation="true"
+                        @onmousedown="e => CellMouseDown((0,0), e)" @onmousedown:preventDefault="true" @onmousedown:stopPropagation="true"
+                        @onmouseup="e => CellMouseUp((0,0), e)" @onmouseup:preventDefault="true" @onmouseup:stopPropagation="true"
+                        @onmousemove="e => CellMouseMove((0,0), e)" @onmousemove:preventDefault="true" @onmousemove:stopPropagation="true"
+                    ></th>
+
+                    @*Celle (0,n) - Intestazioni di colonna *@
                     @for (int c = 1; c <= Columns; c++)
                     {
-                        var col = c; // copio il valore da passare nelle lambda
-                        <Cell Column=col Click=CellClick MouseDown=CellMouseDown MouseUp=CellMouseUp />
+                        var col = c; // copio il valore da passare nelle lambda, altrimenti tutte le occorrenze beccano il valore finale di c
+                        var pos0 = (0, col);
+                        <th class=@getThClasses(pos0).JoinStrings()
+                            @onclick="e => CellClick(pos0, e)" @onclick:preventDefault="true" @onclick:stopPropagation="true"
+                            @onmousedown="e => CellMouseDown(pos0, e)" @onmousedown:preventDefault="true" @onmousedown:stopPropagation="true"
+                            @onmouseup="e => CellMouseUp(pos0, e)" @onmouseup:preventDefault="true" @onmouseup:stopPropagation="true"
+                            @onmousemove="e => CellMouseMove(pos0, e)" @onmousemove:preventDefault="true" @onmousemove:stopPropagation="true"
+                        >@(Utils.GetColumnLabel(c))</th>
                     }
                 </tr>
             </thead>
-            <tbody>
-                @for (int r = 1; r <= Rows; r++)
+            <tbody> @*@onkeypress="TableBodyKeyPress" @onkeypress:stopPropagation*@
+                @for (int row = 1; row <= Rows; row++)
                 {
-                    var row = r; // copio il valore da passare nelle lambda
+                    Position pos0 = (row, 0);
                     <tr>
-                        <Cell Row=row Click=CellClick MouseDown=CellMouseDown MouseUp=CellMouseUp />
-                        @for (int c = 1; c <= Columns; c++)
+                        @*Celle(n,0) - Intestazioni di riga *@
+                        <th class=@getThClasses(pos0).JoinStrings()
+                            @onclick="e => CellClick(pos0, e)" @onclick:preventDefault="true" @onclick:stopPropagation="true"
+                            @onmousedown="e => CellMouseDown(pos0, e)" @onmousedown:preventDefault="true" @onmousedown:stopPropagation="true"
+                            @onmouseup="e => CellMouseUp(pos0, e)" @onmouseup:preventDefault="true" @onmouseup:stopPropagation="true"
+                            @onmousemove="e => CellMouseMove(pos0, e)" @onmousemove:preventDefault="true" @onmousemove:stopPropagation="true"
+                        >@row</th>
+
+                        @*Celle(n,m) - Area dati *@
+                        @for (int col = 1; col <= Columns; col++)
                         {
-                            var col = c; // copio il valore da passare nelle lambda
-                            <Cell Row=row Column=col Click=CellClick MouseDown=CellMouseDown MouseUp=CellMouseUp />
+                            Position pos = (row, col);
+                            <td class=@getTdClasses(pos).JoinStrings()
+                                @onclick="e => CellClick(pos, e)" @onclick:preventDefault="true" @onclick:stopPropagation="true"
+                                @onmousedown="e => CellMouseDown(pos, e)" @onmousedown:preventDefault="true" @onmousedown:stopPropagation="true"
+                                @onmouseup="e => CellMouseUp(pos, e)" @onmouseup:preventDefault="true" @onmouseup:stopPropagation="true"
+                                @onmousemove="e => CellMouseMove(pos, e)" @onmousemove:preventDefault="true" @onmousemove:stopPropagation="true"
+                            >
+                                @{
+                                    if (pos == CurrentPosition)
+                                    {
+                                        var cell = GetCell(pos, true);
+                                        <input @key=pos @ref="CellInput"
+                                               @onkeypress="CellInputKeyPress"
+                                               @bind="cell.Value" @bind:event="oninput"
+                                               style="width:76px"
+                                               />
+                                    }
+                                    else
+                                    {
+                                        <span>@GetCell(pos)?.Value</span>
+                                    }
+                                }
+                            </td>
                         }
                     </tr>
                 }
             </tbody>
         </table>
     </div>
+
+    @*<ol>@foreach (Cell c in SheetData) { <li>@c.Position: @c.Value</li> }</ol>*@
 </div>
 
-@code
-{
-    [Parameter] public int Rows { get; set; } = 20;
-    [Parameter] public int Columns { get; set; } = 10;
-
-    private bool MouseDown;
-    private int CurrentRow;
-    private int CurrentCol;
-
-    private void CellClick(Cell c) { CurrentRow = c.Row; CurrentCol = c.Column; }
-    private void CellMouseDown(Cell c) { MouseDown = true; CellClick(c); }
-    private void CellMouseUp(Cell c) { MouseDown = false; CellClick(c); }
-}
