@@ -1,81 +1,79 @@
 ﻿<div class="workbook">
-    <input @ref="StatusBar" readonly style="width:100%" value="
-    Position: @CurrentPosition
-    Selection: @($"{Selection.Height}x{Selection.Width} from {Selection.Start} to {Selection.End}")
-    Mouse Down: @(MouseDown ? "SI" : "NO")
-    Data Size: @SheetData.Count
-    " />
+    <span @ref="StatusBar" style="width:100%">
+        Position: @CurrentPosition
+        Selection: @($"{Selection} ({(Selection.Size.Row==0?"[ALL]":Selection.Size.Row)}Rx{(Selection.Size.Col==0?"[ALL]": Selection.Size.Col)}C)")
+        @if (LastMouseEvent != null)
+        {
+            <span style="border:@(MouseDown?"2px solid red":"none")">
+                Mouse Button: @LastMouseEvent.Button
+                @(LastMouseEvent.ShiftKey?"+SHIFT":"")
+                @(LastMouseEvent.CtrlKey?"+CTRL":"")
+                @(LastMouseEvent.AltKey?"+ALT":"")
+                @(LastMouseEvent.MetaKey?"+META":"")
+                (@LastMouseEvent.Type)
+            </span>
+        }
 
-    <div class="sheet">
-        <table>
-            <thead>
-                <tr>
-                    @*Cella (0,0) - Incrocio delle intestazioni *@
-                    <th class=@getThClasses((0,0)).JoinStrings()
-                        @onclick="e => CellClick((0,0), e)" @onclick:preventDefault="true" @onclick:stopPropagation="true"
-                        @onmousedown="e => CellMouseDown((0,0), e)" @onmousedown:preventDefault="true" @onmousedown:stopPropagation="true"
-                        @onmouseup="e => CellMouseUp((0,0), e)" @onmouseup:preventDefault="true" @onmouseup:stopPropagation="true"
-                        @onmousemove="e => CellMouseMove((0,0), e)" @onmousemove:preventDefault="true" @onmousemove:stopPropagation="true"
-                    ></th>
+        Data Size: @SheetData.Count
+        @if (LastKeyEvent != null)
+        {
+            <span style="border:@(KeyDown?"2px solid red":"none")"> Key Press: @LastKeyEvent.Key Code: @LastKeyEvent.Code
+                    @(LastKeyEvent.ShiftKey?"+SHIFT":"")
+                    @(LastKeyEvent.CtrlKey?"+CTRL":"")
+                    @(LastKeyEvent.AltKey?"+ALT":"")
+                    @(LastKeyEvent.MetaKey?"+META":"")
+            </span>
+        }
+    </span>
 
-                    @*Celle (0,n) - Intestazioni di colonna *@
-                    @for (int c = 1; c <= Columns; c++)
-                    {
-                        var col = c; // copio il valore da passare nelle lambda, altrimenti tutte le occorrenze beccano il valore finale di c
-                        var pos0 = (0, col);
-                        <th class=@getThClasses(pos0).JoinStrings()
-                            @onclick="e => CellClick(pos0, e)" @onclick:preventDefault="true" @onclick:stopPropagation="true"
-                            @onmousedown="e => CellMouseDown(pos0, e)" @onmousedown:preventDefault="true" @onmousedown:stopPropagation="true"
-                            @onmouseup="e => CellMouseUp(pos0, e)" @onmouseup:preventDefault="true" @onmouseup:stopPropagation="true"
-                            @onmousemove="e => CellMouseMove(pos0, e)" @onmousemove:preventDefault="true" @onmousemove:stopPropagation="true"
-                        >@(Utils.GetColumnLabel(c))</th>
-                    }
-                </tr>
-            </thead>
-            <tbody>
-                @for (int row = 1; row <= Rows; row++)
-                {
-                    Position pos0 = (row, 0);
-                    <tr>
-                        @*Celle(n,0) - Intestazioni di riga *@
-                        <th class=@getThClasses(pos0).JoinStrings()
-                            @onclick="e => CellClick(pos0, e)" @onclick:preventDefault="true" @onclick:stopPropagation="true"
-                            @onmousedown="e => CellMouseDown(pos0, e)" @onmousedown:preventDefault="true" @onmousedown:stopPropagation="true"
-                            @onmouseup="e => CellMouseUp(pos0, e)" @onmouseup:preventDefault="true" @onmouseup:stopPropagation="true"
-                            @onmousemove="e => CellMouseMove(pos0, e)" @onmousemove:preventDefault="true" @onmousemove:stopPropagation="true"
-                        >@row</th>
-
-                        @*Celle(n,m) - Area dati *@
-                        @for (int col = 1; col <= Columns; col++)
+    <div class="sheet" @ref="SheetDiv" tabindex="0"
+     @onkeydown="SheetKeyDown" @onkeydown:preventDefault="true" @onkeydown:stopPropagation="true"
+     @onkeyup="e => { KeyDown = false; }"
+     >
+    @{
+        var top = 0; var left = 0;var width = 80;var height = 30;
+        for (int row = 0; row <= Rows; row++)
+        {
+            left = 0;
+            for (int col = 0; col <= Columns; col++)
+            {
+                width = (col == 0 ? 30 : 80);
+                Position pos = (row, col);
+                <div class=@GetCellClass(pos)
+                        style="@($"top:{top}px;left:{left}px;width:{width}px;height:{height}px")"
+                        @onclick="e => CellClick(pos, e)" @onclick:preventDefault="true" @onclick:stopPropagation="true"
+                        @onmousedown="e => CellMouseDown(pos, e)" @onmousedown:preventDefault="true" @onmousedown:stopPropagation="true"
+                        @onmouseup="e => CellMouseUp(pos, e)" @onmouseup:preventDefault="true" @onmouseup:stopPropagation="true"
+                        @onmousemove="e => CellMouseMove(pos, e)" @onmousemove:preventDefault="true" @onmousemove:stopPropagation="true"
+                        >
+                    @{
+                        if (pos.IsIntestazioneColonna)
                         {
-                            Position pos = (row, col);
-                            <td class=@getTdClasses(pos).JoinStrings()
-                                @onclick="e => CellClick(pos, e)" @onclick:preventDefault="true" @onclick:stopPropagation="true"
-                                @onmousedown="e => CellMouseDown(pos, e)" @onmousedown:preventDefault="true" @onmousedown:stopPropagation="true"
-                                @onmouseup="e => CellMouseUp(pos, e)" @onmouseup:preventDefault="true" @onmouseup:stopPropagation="true"
-                                @onmousemove="e => CellMouseMove(pos, e)" @onmousemove:preventDefault="true" @onmousemove:stopPropagation="true"
-                            >
-                                @{
-                                    if (pos == CurrentPosition)
-                                    {
-                                        var cell = GetCell(pos, true);
-                                        <input @key=pos @ref="CellInput"
-                                               @bind="cell.Value" @bind:event="oninput"
-                                               style="width:76px"
-                                               />
-                                    }
-                                    else
-                                    {
-                                        <span>@GetCell(pos)?.Value</span>
-                                    }
-                                }
-                            </td>
+                            <span>@Utils.GetColumnLabel(col)</span>
                         }
-                    </tr>
-                }
-            </tbody>
-        </table>
+                        else if (pos.IsIntestazioneRiga)
+                        {
+                            <span>@row</span>
+                        }
+                        else if (pos == CurrentPosition && InEdit)
+                        {
+                            var cell = GetCell(pos, true);
+                            <input @key=pos @ref="CellInput"
+                                    @bind="cell.Value" @bind:event="oninput"
+                                    style="width:100%;height:100%"
+                                    />
+                        }
+                        else
+                        {
+                            <span>@GetCell(pos)?.Value</span>
+                        }
+                    }
+                </div>
+                left += width;
+            }
+            top += height;
+        }
+    }
     </div>
-
 </div>
 
